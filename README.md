@@ -1,6 +1,6 @@
 # Proyecto ARIZONA
 
-Bienvenido al proyecto NombreDelProyecto. Este archivo proporciona pasos claros sobre cómo configurar el proyecto correctamente. Asegúrate de seguir cada paso para evitar problemas.
+Bienvenido al proyecto NombreDelProyecto. Este archivo proporciona pasos claros sobre cómo configurar el proyecto correctamente.
 
 ## Pasos de configuración
 
