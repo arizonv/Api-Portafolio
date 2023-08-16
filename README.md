@@ -4,7 +4,7 @@ python manage.py createsuperuser;
 
 
 
-Api cambiar estadpo reserva.
+Api cambiar estado reserva.
 
 {
     'codigo':''
