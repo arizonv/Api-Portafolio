@@ -67,5 +67,4 @@ python manage.py migrate
 ├── 📄 README.md
 ├── 📄 requirements.txt
 ├── 📄 db.sqlite3
-├── 📄 foldermap.txt
 |
