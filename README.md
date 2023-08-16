@@ -1,11 +1,11 @@
-python manage.py makemigrations accounts cliente servicio;
-python manage.py migrate;
-python manage.py createsuperuser;
+# Proyecto ARIZONA
 
+Bienvenido al proyecto NombreDelProyecto. Este archivo proporciona pasos claros sobre cómo configurar el proyecto correctamente. Asegúrate de seguir cada paso para evitar problemas.
 
+## Pasos de configuración
 
-Api cambiar estado reserva.
+1. Ejecuta las migraciones para preparar la base de datos:
 
-{
-    'codigo':''
-}
+```Terminal.
+python manage.py makemigrations accounts cliente servicio
+python manage.py migrate
