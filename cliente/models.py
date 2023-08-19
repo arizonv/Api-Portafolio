@@ -54,7 +54,7 @@ def crear_ticket(sender, instance, created, **kwargs):
 
         if not existing_ticket:
             codigo = generar_codigo()
-            correo_destino = 'a.vasgarridoe@gmail.com'
+            correo_destino = 'arizonatitulo23@gmail.com'
             cliente = instance.cliente
             detalles = instance.agenda
             asunto = 'Qr de verificación para tu reserva'
