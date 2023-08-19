@@ -56,7 +56,6 @@ def crear_ticket(sender, instance, created, **kwargs):
             codigo = generar_codigo()
             correo_destino = 'a.vasgarridoe@gmail.com'
             cliente = instance.cliente
-            fecha_reserva = instance.dia
             detalles = instance.agenda
             asunto = 'Qr de verificación para tu reserva'
             mensaje = f'Tu código de seguridad: {codigo}'
@@ -66,12 +65,10 @@ def crear_ticket(sender, instance, created, **kwargs):
                 'cliente_user': cliente.user.username,
                 'cliente_nombre': cliente.user.name,
                 'cliente_apellidos': cliente.user.apellidos,
-                'fecha_reserva': str(fecha_reserva),
-                'detalles': str(detalles),
-                'dia': str(detalles.dia),
-                'cancha': str(detalles.agenda.cancha),
-                'horario': str(detalles.agenda.horario),
-                'estado': str(detalles.estado),
+                'cancha': str(detalles.cancha),
+                'horario': str(detalles.horario),
+                'dia': instance.dia.strftime('%d-%m-%Y'),  
+                'estado': instance.estado,
             }
             qr_img = generar_qr(qr_data)
             enviar_correo(asunto, mensaje, correo_destino, qr_img)
