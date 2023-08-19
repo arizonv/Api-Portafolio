@@ -10,6 +10,15 @@ Bienvenido al proyecto NombreDelProyecto. Este archivo proporciona pasos claros 
 python manage.py makemigrations accounts cliente servicio
 python manage.py migrate
 
+2. funcionamiento de la api de cambio de estado de la resrva mediante el codigo :
+
+```utl- /api/reserva/codigo/.
+
+{
+    'codigo':'codigo de la reserva que fue enviado al correo de pruebas'
+}
+
+
 
 ├── 📁 accounts
 │   ├── 📄 admin.py
