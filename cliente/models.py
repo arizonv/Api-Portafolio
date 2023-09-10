@@ -1,16 +1,13 @@
 from django.db import models
+from servicio.models import Agenda
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-import datetime
 from servicio.models import Agenda
-import random
-import string
-from django.core.mail import send_mail
-from django.conf import settings
-from .utils import generar_codigo, generar_qr, enviar_correo
+
+
 
 class Cliente(models.Model):
     SEXO = [
@@ -47,32 +44,16 @@ class Reserva(models.Model):
         return f"Reserva de {self.cliente} para el {formatted_date}, {self.agenda.cancha} {self.agenda.horario}"
 
 
+#CREA UNA BOLETA AUTOMATICAMENTE CUANDO SE CREA UNA RESERVA
 @receiver(post_save, sender=Reserva)
-def crear_ticket(sender, instance, created, **kwargs):
+def crear_boleta(sender, instance, created, **kwargs):
     if created or (not instance._state.adding and instance.estado == 'pendiente'):
-        existing_ticket = Ticket.objects.filter(reserva=instance).first()
-
-        if not existing_ticket:
-            codigo = generar_codigo()
-            correo_destino = 'arizonatitulo23@gmail.com'
-            cliente = instance.cliente
-            detalles = instance.agenda
-            asunto = 'Qr de verificación para tu reserva'
-            mensaje = f'Tu código de seguridad: {codigo}'
-            
-            qr_data = {
-                'codigo_seguro': codigo,
-                'cliente_user': cliente.user.username,
-                'cliente_nombre': cliente.user.name,
-                'cliente_apellidos': cliente.user.apellidos,
-                'cancha': str(detalles.cancha),
-                'horario': str(detalles.horario),
-                'dia': instance.dia.strftime('%d-%m-%Y'),  
-                'estado': instance.estado,
-            }
-            qr_img = generar_qr(qr_data)
-            enviar_correo(asunto, mensaje, correo_destino, qr_img)
-            Ticket.objects.create(cliente=cliente, reserva=instance, codigo=codigo)
+        # Obtén el tipo de cancha asociado a la reserva
+        tipo_cancha = instance.agenda.cancha.tipo
+        # Calcula la mitad del precio del tipo de cancha
+        mitad_precio = tipo_cancha.precio / 2
+        # Crea una instancia de Boleta con el valor calculado
+        Boleta.objects.create(cliente=instance.cliente, reserva=instance, total=mitad_precio)
 
 
 class Ticket(models.Model):
@@ -80,7 +61,6 @@ class Ticket(models.Model):
     codigo = models.CharField(max_length=10)
     fecha_envio = models.DateTimeField(auto_now_add=True)
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
-
 
 class Boleta(models.Model):
     fecha_emision = models.DateTimeField(default=timezone.now)

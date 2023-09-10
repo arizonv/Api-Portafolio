@@ -21,8 +21,18 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl import Workbook
 from cliente.models import Cliente,Boleta,Reserva,Ticket
 
+
+
+#decorador
+from accounts.decorators import has_permission
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+
+
 from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import ParseError
+
+
 
 
 #API DE LOGIN PARA IBICIAR SESION 
@@ -42,7 +52,6 @@ class LoginAPIView(APIView):
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-
 # API PARA CERRAR SESION
 class UserLogout(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -52,10 +61,7 @@ class UserLogout(APIView):
         logout(request)
         return Response('Logout successfully')
 
-
-
 #API PARA LISTAR TODOS LOS USUARIOS
-
 class UserList(generics.ListAPIView):
     # authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -64,8 +70,6 @@ class UserList(generics.ListAPIView):
     serializer_class = listSerializer
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
 
 #API DE REGISTRO DE USUARIO ( POR DEFECTO COMO EXPLICA EN EL MODELO SE CREARA POR DEFECTO QUE EL USUARIO SEA CLIENTE YA QUE ES EL FORM DE REGISTRO DE LA PAGINA)
 class Register(generics.GenericAPIView):
@@ -79,35 +83,9 @@ class Register(generics.GenericAPIView):
             "user": listSerializer(user).data,
             "message": "User Created Successfully.",
         })
-    
-
-    
-
-#FUNCIONES PARA SEGUNDO PAGO VALIDACION MOVIL (TRABAJADOR)
-class ReservaPorCodigoAPIView(APIView):
-    parser_classes = [JSONParser]
-    def post(self, request, format=None):
-        try:
-            codigo = request.data.get('codigo')
-            if codigo is None:
-                raise ParseError('Campo "codigo" es requerido en el cuerpo JSON.')
-            try:
-                ticket = Ticket.objects.get(codigo=codigo)
-                reserva = ticket.reserva
-                reserva.estado = 'finalizada'
-                reserva.save()
-                return Response({'Reserva pagada': str(reserva)}, status=status.HTTP_200_OK)
-            except Ticket.DoesNotExist:
-                return Response({'error': 'Ticket no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-
 
 #API PARA GENERAR REPORTES DE TODOS LOS MODELOS IMPORTANTES
-
+# @method_decorator(has_permission(['']), name='dispatch')
 class ExcelReportView(APIView):
     def generate_excel(self, data, headers, sheet_title, filename):
         workbook = Workbook()
@@ -193,12 +171,34 @@ class ExcelReportView(APIView):
         workbook.save(response)
         return response
 
+#FUNCIONES PARA SEGUNDO PAGO VALIDACION MOVIL (TRABAJADOR)
+class ReservaPorCodigoAPIView(APIView):
+    parser_classes = [JSONParser]
+    def post(self, request, format=None):
+        try:
+            codigo = request.data.get('codigo')
+            if codigo is None:
+                raise ParseError('Campo "codigo" es requerido en el cuerpo JSON.')
+            try:
+                ticket = Ticket.objects.get(codigo=codigo)
+                reserva = ticket.reserva
+                reserva.estado = 'finalizada'
+                reserva.save()
 
+                boleta_anterior = Boleta.objects.get(reserva=reserva)
+                nuevo_pago = boleta_anterior.total
+                nueva_boleta = Boleta.objects.create(cliente=boleta_anterior.cliente, reserva=reserva, total=nuevo_pago)
+                    
+                # boleta = Boleta.objects.get(reserva=reserva)
+                # otro_pago = boleta.total 
+                # boleta.total += otro_pago
+                # boleta.save()
+                
+                return Response({'Reserva pagada': str(reserva)}, status=status.HTTP_200_OK)
+            except Ticket.DoesNotExist:
+                return Response({'error': 'Ticket no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-
-
-
-
-
-
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
 

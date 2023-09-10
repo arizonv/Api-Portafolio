@@ -3,12 +3,7 @@ import os
 import socket
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-v2_d#nv6ls^j+a0z457$xr##kt1s)40u__pew2jkh%d*01)+s='
@@ -18,6 +13,25 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# Define manualmente la URL de GitHub CodeSpaces
+github_codespace_url = "https://crispy-space-succotash-67wg5q4jrj5hxxjx-8000.app.github.dev"
+
+# Divide la URL para extraer el nombre del entorno y el dominio
+github_codespace_parts = github_codespace_url.split(".")
+github_codespace_name = github_codespace_parts[0].replace("https://", "")
+github_codespace_domain = ".".join(github_codespace_parts[1:])
+
+# Define la lista de orígenes permitidos para CSRF
+CSRF_TRUSTED_ORIGINS = []
+
+# Agrega localhost:8000 como origen permitido (útil para desarrollo local)
+CSRF_TRUSTED_ORIGINS.append("http://localhost:8000")
+CSRF_TRUSTED_ORIGINS.append("https://localhost:8000")  # También permitimos HTTPS
+
+# Si se está ejecutando en GitHub CodeSpaces, agrega la URL de GitHub CodeSpaces como origen permitido
+if github_codespace_name and github_codespace_domain:
+    github_codespace_url = f"https://{github_codespace_name}-8000.{github_codespace_domain}"
+    CSRF_TRUSTED_ORIGINS.append(github_codespace_url)
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -31,7 +45,7 @@ DJANGO_APPS = [
 #SE SEPARO EN LISTAS PARA LLEVAR MEJOR ORDEN 
 
 #APPS LOCALES
-LOCAL_APPS = ['accounts','servicio','cliente',]
+LOCAL_APPS = ['accounts','login','servicio','cliente',]
 
 #API
 API_REST = ['api',]
@@ -55,8 +69,17 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',   
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+# En el archivo CORS_ORIGIN_WHITELIST, también asegúrate de permitir ambas versiones de localhost
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:4200',
+    'https://localhost:4200',  # También permitimos HTTPS
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'core.urls'
 X_FRAME_OPTIONS = "ALLOW-FROM preview.app.github.dev"
@@ -77,13 +100,6 @@ TEMPLATES = [
     },
 ]
 
-
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:4200','http://localhost:8100',
-]
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
@@ -159,10 +175,9 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication', 
+        'rest_framework.authentication.SessionAuthentication',
     ]
 }
-
 
 AUTH_USER_MODEL = 'accounts.User'
 
