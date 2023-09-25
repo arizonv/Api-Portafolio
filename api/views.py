@@ -11,8 +11,10 @@ from .serializers import (
     LoginSerializer,
     listSerializer,
     createUserSerializer,
+    RegionesSerializer,
+    ComplejoDeportivoSerializer,
 )
-from accounts.models import User
+from accounts.models import User,Region,ComplejoDeportivo
 from django.contrib.auth import authenticate, login, logout
 
 import openpyxl
@@ -20,8 +22,6 @@ from django.http import HttpResponse
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl import Workbook
 from cliente.models import Cliente,Boleta,Reserva,Ticket
-
-
 
 #decorador
 from accounts.decorators import has_permission
@@ -31,8 +31,6 @@ from django.contrib.auth.decorators import login_required
 
 from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import ParseError
-
-
 
 
 #API DE LOGIN PARA IBICIAR SESION 
@@ -64,12 +62,24 @@ class UserLogout(APIView):
 #API PARA LISTAR TODOS LOS USUARIOS
 class UserList(generics.ListAPIView):
     # authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     queryset = User.objects.all()
     serializer_class = listSerializer
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+
+class RegionesList(generics.ListAPIView):
+    queryset = Region.objects.all()
+    serializer_class = RegionesSerializer
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+class ComplejoDeportivoList(generics.ListCreateAPIView):
+    serializer_class = ComplejoDeportivoSerializer
+    queryset = ComplejoDeportivo.objects.all()
 
 #API DE REGISTRO DE USUARIO ( POR DEFECTO COMO EXPLICA EN EL MODELO SE CREARA POR DEFECTO QUE EL USUARIO SEA CLIENTE YA QUE ES EL FORM DE REGISTRO DE LA PAGINA)
 class Register(generics.GenericAPIView):
@@ -83,6 +93,9 @@ class Register(generics.GenericAPIView):
             "user": listSerializer(user).data,
             "message": "User Created Successfully.",
         })
+
+
+
 
 #API PARA GENERAR REPORTES DE TODOS LOS MODELOS IMPORTANTES
 # @method_decorator(has_permission(['']), name='dispatch')

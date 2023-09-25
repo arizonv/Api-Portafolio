@@ -11,10 +11,6 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('account/', include('accounts.urls')),
-    # path('servicio/', include('servicio.urls')),
-    # path('cliente/', include('cliente.urls')),
-    path('auth/', include('login.urls')),
     ######## LOGIN API REST ########
     path('api/', include('api.urls')),
     ######### PAGES #################

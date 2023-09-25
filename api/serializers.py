@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from accounts.models import User
+from accounts.models import User,Region,ComplejoDeportivo
 from rest_framework.validators import UniqueValidator
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,6 +12,18 @@ class listSerializer (serializers.ModelSerializer):
      class Meta:
          model = User
          fields = ("id","email","username","is_staff","is_active","date_joined")
+
+
+class RegionesSerializer (serializers.ModelSerializer):
+     class Meta:
+         model = Region
+         fields = '__all__'
+
+
+class ComplejoDeportivoSerializer (serializers.ModelSerializer):
+     class Meta:
+         model = ComplejoDeportivo
+         fields = '__all__'
 
 
 class LoginSerializer(serializers.Serializer):
